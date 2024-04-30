@@ -1,5 +1,6 @@
 package io.delightlabs.aegis
 
+import io.delightlabs.aegis.crypt.hash.blake2b
 import org.junit.Test
 
 import org.junit.Assert.*
