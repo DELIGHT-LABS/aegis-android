@@ -7,7 +7,7 @@ typealias Secret = ByteArray
 interface ThresholdAlgorithm {
     fun getName(): Algorithm
     fun dealShares(secret: Secret, threshold: Int, total: Int): List<Share>
-    fun combineShares(shares: List<Share>, threshold: Int, total: Int): Secret
+    fun combineShares(shares: List<Share>): Secret
 }
 
 interface Share {

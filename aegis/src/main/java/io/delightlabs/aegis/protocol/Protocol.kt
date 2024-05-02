@@ -16,7 +16,7 @@ import java.lang.reflect.Type
 import java.util.Base64
 
 enum class Version {
-    V0, V1
+    UNSPECIFIED, V0, V1
 }
 
 interface Protocol {

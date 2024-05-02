@@ -35,7 +35,7 @@ class Ed25519ThresholdV0: ThresholdAlgorithm {
         return emptyList()
     }
 
-    override fun combineShares(shares: List<Share>, threshold: Int, total: Int): Secret {
+    override fun combineShares(shares: List<Share>): Secret {
         // The implementation of this method is omitted for brevity.
         // You should replace this with your actual implementation.
         return ByteArray(0)
