@@ -28,7 +28,6 @@ class VersionV1 : Protocol {
         this.sharePacket = v.serialize()
         this.share = v
 
-        println(String(gson.toJson(this).toByteArray()))
         return gson.toJson(this).toByteArray()
     }
 

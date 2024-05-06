@@ -19,8 +19,13 @@ import io.delightlabs.aegis.protocol.unpack
 
 typealias payload = ByteArray
 class Aegis (threshold: Int, total: Int) {
-    val threshold: Int = 0
-    val total: Int = 0
+    var threshold: Int = 0
+    var total: Int = 0
+
+    init {
+        this.threshold = threshold
+        this.total = total
+    }
 
     var payloads: List<payload> = emptyList()
 
@@ -77,11 +82,10 @@ class Aegis (threshold: Int, total: Int) {
 
         var shares = emptyList<Share>()
         payloads.forEach { payload ->
-            var share = unpack(payload)
+            val share = unpack(payload)
             if (share !is Share) {
                 throw Exception("Protocol argument mismatch")
             }
-            share = share as Share
             shares = shares.plus(share)
 
             if (algorithm == Algorithm.UNSPECIFIED) {
