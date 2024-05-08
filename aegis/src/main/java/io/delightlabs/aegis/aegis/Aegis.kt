@@ -18,15 +18,7 @@ import io.delightlabs.aegis.protocol.unpack
 
 
 typealias payload = ByteArray
-class Aegis (threshold: Int, total: Int) {
-    var threshold: Int = 0
-    var total: Int = 0
-
-    init {
-        this.threshold = threshold
-        this.total = total
-    }
-
+class Aegis {
     var payloads: List<payload> = emptyList()
 
     companion object {
@@ -40,7 +32,7 @@ class Aegis (threshold: Int, total: Int) {
             secret: Secret,
             password: ByteArray
         ): Aegis {
-            val aegis = Aegis(threshold, total)
+            val aegis = Aegis()
 
             if (threshold < NUM_MINIMUM_SHARE) {
                 throw Exception("too low threshold")

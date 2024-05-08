@@ -38,7 +38,7 @@ class CitadelUnitTest {
             val retrieved = citadel.retrieve(uuid)
             assert(retrieved.size == 3)
 
-            val aegis2 = Aegis(3,3)
+            val aegis2 = Aegis()
             aegis2.payloads = retrieved
             val msg = aegis2.combineShares(key)
             assert(msg.contentEquals(secret))
