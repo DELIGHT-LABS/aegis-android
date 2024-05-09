@@ -23,7 +23,7 @@ data class Fort(
 )
 
 @Serializable
-data class SecretPayload(val overwrite: Boolean, val secret: String, val id: String)
+data class SecretPayload(val overwrite: Boolean, val secret: String)
 
 @Serializable
 data class SecretResponse(val secret: String)
@@ -36,7 +36,7 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
             throw Exception("Payloads and Fort do not match")
         }
 
-        val strKey = Base64.getEncoder().encodeToString(key)
+//        val strKey = Base64.getEncoder().encodeToString(key)
 
         val responses = mutableListOf<Deferred<Unit>>()
         for (i in payloads.indices) {
@@ -44,7 +44,7 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
             val data = Base64.getEncoder().encodeToString(payloads[i])
 
             val res = coroutineScope {
-                async { postSecret(forts[i], strKey, data, true) }
+                async { putSecret(forts[i], data, true) }
             }
             responses.add(res)
         }
@@ -62,7 +62,7 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
             coroutineScope {
                 supervisorScope {
                     forts.map { fort ->
-                        val res = async { getSecret(fort, strKey) }
+                        val res = async { getSecret(fort) }
                         responses.add(res)
                     }
                 }
@@ -83,28 +83,28 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
     }
 
     @OptIn(InternalAPI::class)
-    private suspend fun postSecret(fort: Fort, id: String, secret: String, overwrite: Boolean = true) {
-        val payload = SecretPayload(overwrite, secret, id)
+    private suspend fun putSecret(fort: Fort, secret: String, overwrite: Boolean = true) {
+        val payload = SecretPayload(overwrite, secret)
         val client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 gson()
             }
         }
 
-        val response: HttpResponse = client.post("${fort.url}/api/v0/secret") {
+        val response: HttpResponse = client.put("${fort.url}/api/v0/secret") {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer ${fort.token}")
             setBody(payload)
         }
 
-        if (response.status != HttpStatusCode.OK) {
+        if (!(response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created)) {
             throw Exception("HTTP error! status: ${response.status}")
         }
 
         client.close()
     }
 
-    private suspend fun getSecret(fort: Fort, id: String): String {
+    private suspend fun getSecret(fort: Fort): String {
         val client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 gson()
