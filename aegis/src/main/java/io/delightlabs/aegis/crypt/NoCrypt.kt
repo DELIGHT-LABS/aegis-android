@@ -46,6 +46,8 @@ class NoCrypt: ThresholdAlgorithm {
     override fun dealShares(secret: Secret, threshold: Int, total: Int): List<Share> {
         val ncShare = NoCryptShare(ByteArray(0))
         ncShare.content = secret
+        ncShare.threshold = threshold
+        ncShare.total = total
 
         return List(total){ncShare}
     }
