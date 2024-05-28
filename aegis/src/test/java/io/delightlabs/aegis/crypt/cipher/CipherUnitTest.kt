@@ -43,7 +43,7 @@ class CipherUnitTest {
 
         val encrypted = encrypt(Version.V1, secret, password)
         Assert.assertEquals(
-            "VjEAAAAAAAAAAAAAAAAAAElyU3VpWFo0TDhOQ0hJRFp6TGxmNERRcXczTFBhUkM1dHN6V1k3NUZBT0E9",
+            "eyJ2ZXJzaW9uIjoiVjEiLCJjaXBoZXJUZXh0IjoiU1hKVGRXbFlXalJNT0U1RFNFbEVXbnBNYkdZMFJGRnhkek5NVUdGU1F6VjBjM3BYV1RjMVJrRlBRVDA9In0=",
             Base64.getEncoder().encodeToString(encrypted)
         )
 
@@ -58,7 +58,7 @@ class CipherUnitTest {
 
         val encrypted = encrypt(Version.V1, secret, password)
         Assert.assertEquals(
-            "VjEAAAAAAAAAAAAAAAAAAG9UTTRyeE9oREJsNlZEellnbFIrWGVQK3Via2pvckRNNXpIakRXYk12ZzA9",
+            "eyJ2ZXJzaW9uIjoiVjEiLCJjaXBoZXJUZXh0IjoiYjFSTk5ISjRUMmhFUW13MlZrUjZXV2RzVWl0WVpWQXJkV0pyYW05eVJFMDFla2hxUkZkaVRYWm5NRDA9In0=",
             Base64.getEncoder().encodeToString(encrypted)
         )
 

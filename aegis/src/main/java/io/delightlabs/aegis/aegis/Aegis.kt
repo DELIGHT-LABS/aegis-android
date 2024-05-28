@@ -3,6 +3,7 @@ package io.delightlabs.aegis
 import android.os.Build
 import androidx.annotation.RequiresApi
 import io.delightlabs.aegis.common.NUM_MINIMUM_SHARE
+import io.delightlabs.aegis.common.Packet
 import io.delightlabs.aegis.common.Secret
 import io.delightlabs.aegis.common.Share
 import io.delightlabs.aegis.crypt.Algorithm
@@ -86,7 +87,7 @@ class Aegis {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray): Secret {
+fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray): Packet {
     val encrypted = cipherEncrypt(cVersion, secret, password)
 
     // Verify
@@ -100,6 +101,6 @@ fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray): Secre
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun decrypt(secret: Secret, password: ByteArray): Secret {
+fun decrypt(secret: Packet, password: ByteArray): Secret {
     return cipherDecrypt(secret, password)
 }

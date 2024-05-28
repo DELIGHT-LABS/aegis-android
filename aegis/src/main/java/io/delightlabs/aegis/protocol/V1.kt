@@ -1,6 +1,7 @@
 package io.delightlabs.aegis.protocol
 
 import com.google.gson.annotations.SerializedName
+import io.delightlabs.aegis.common.Packet
 import io.delightlabs.aegis.crypt.Algorithm
 import io.delightlabs.aegis.common.Share
 import java.lang.Exception
@@ -31,7 +32,7 @@ class VersionV1 : Protocol {
         return gson.toJson(this).toByteArray()
     }
 
-    override fun unpack(packet: ByteArray): Any {
+    override fun unpack(packet: Packet): Any {
         val v1 = gson.fromJson(String(packet), VersionV1::class.java)
 
         this.share = Algorithm.valueOf(v1.cryptAlgorithm!!).newShare(v1.sharePacket!!)

@@ -11,6 +11,7 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
+import io.delightlabs.aegis.common.Packet
 import java.lang.Exception
 import java.lang.reflect.Type
 import java.util.Base64
@@ -21,11 +22,9 @@ enum class Version {
 
 interface Protocol {
     fun getVersion(): Version
-    fun pack(v: Any): ByteArray
-    fun unpack(packet: ByteArray): Any
+    fun pack(v: Any): Packet
+    fun unpack(packet: Packet): Any
 }
-
-typealias Packet = ByteArray
 
 data class Payload(
     @SerializedName("protocol_version")

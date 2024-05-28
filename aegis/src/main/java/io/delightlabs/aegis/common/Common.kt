@@ -2,6 +2,8 @@ package io.delightlabs.aegis.common
 
 import io.delightlabs.aegis.crypt.Algorithm
 
+typealias Packet = ByteArray
+
 typealias Secret = ByteArray
 
 interface ThresholdAlgorithm {
