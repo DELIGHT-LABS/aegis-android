@@ -16,8 +16,9 @@ class CitadelUnitTest {
     fun `citadel 1`() {
         val secret = "MESSAGE_1".toByteArray()
         val password = "01234567890123456789012345678901".toByteArray()
+        val salt = "SALT_1".toByteArray()
 
-        val encryptedSecret = encrypt(CipherVersion.V1, secret, password)
+        val encryptedSecret = encrypt(CipherVersion.V1, secret, password, salt)
 
         val aegis = Aegis.dealShares(
             ProtocolVersion.V1,
@@ -43,7 +44,7 @@ class CitadelUnitTest {
 
             val encryptedRes = Aegis.combineShares(retrieved)
 
-            val decryptedRes = decrypt(encryptedRes, password)
+            val decryptedRes = decrypt(encryptedRes, password, salt)
             assert(decryptedRes.contentEquals(secret))
         }
     }

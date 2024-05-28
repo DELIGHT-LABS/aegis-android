@@ -20,12 +20,12 @@ data class CipherPacket (
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun encrypt(version: Version, plainText: Secret, password: ByteArray): Packet {
+fun encrypt(version: Version, plainText: Secret, password: ByteArray, salt: ByteArray): Packet {
     val packet: CipherPacket
 
     when (version) {
         Version.V1 -> {
-            val encrypted = VersionV1().encrypt(plainText, password)
+            val encrypted = VersionV1().encrypt(plainText, password, salt)
             packet = CipherPacket(version, encrypted)
         }
         else -> throw Exception("unsupported cipher version")
@@ -37,14 +37,14 @@ fun encrypt(version: Version, plainText: Secret, password: ByteArray): Packet {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun decrypt(packet: Packet, password: ByteArray): Secret {
+fun decrypt(packet: Packet, password: ByteArray, salt: ByteArray): Secret {
     val cipher = gson.fromJson(String(packet), CipherPacket::class.java)
 
     val decrypted: Secret
 
     when (cipher.version) {
         Version.V1 -> {
-            decrypted = VersionV1().decrypt(cipher.cipherText, password)
+            decrypted = VersionV1().decrypt(cipher.cipherText, password, salt)
         }
         else -> throw Exception("unsupported cipher version")
     }

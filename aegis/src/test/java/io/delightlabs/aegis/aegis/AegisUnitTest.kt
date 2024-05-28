@@ -24,14 +24,11 @@ class AegisUnitTest {
     fun `encrypt & decrypt 1`() {
         val password = "PASSWORD_1".toByteArray()
         val secret = "MESSAGE_1".toByteArray()
+        val salt = "SALT_1".toByteArray()
 
-        val encrypted = encrypt(CipherVerison.V1, secret, password)
-        Assert.assertEquals(
-            "eyJ2ZXJzaW9uIjoiVjEiLCJjaXBoZXJUZXh0IjoiU1hKVGRXbFlXalJNT0U1RFNFbEVXbnBNYkdZMFJGRnhkek5NVUdGU1F6VjBjM3BYV1RjMVJrRlBRVDA9In0=",
-            Base64.getEncoder().encodeToString(encrypted)
-        )
+        val encrypted = encrypt(CipherVerison.V1, secret, password, salt)
 
-        val decrypted = decrypt(encrypted, password)
+        val decrypted = decrypt(encrypted, password, salt)
         Assert.assertEquals(secret.contentToString(), decrypted.contentToString())
     }
 
@@ -39,14 +36,12 @@ class AegisUnitTest {
     fun `encrypt & decrypt 2`() {
         val password = "PASSWORD_2".toByteArray()
         val secret = "MESSAGE_2".toByteArray()
+        val salt = "SALT_2".toByteArray()
 
-        val encrypted = encrypt(CipherVerison.V1, secret, password)
-        Assert.assertEquals(
-            "eyJ2ZXJzaW9uIjoiVjEiLCJjaXBoZXJUZXh0IjoiYjFSTk5ISjRUMmhFUW13MlZrUjZXV2RzVWl0WVpWQXJkV0pyYW05eVJFMDFla2hxUkZkaVRYWm5NRDA9In0=",
-            Base64.getEncoder().encodeToString(encrypted)
-        )
 
-        val decrypted = decrypt(encrypted, password)
+        val encrypted = encrypt(CipherVerison.V1, secret, password, salt)
+
+        val decrypted = decrypt(encrypted, password, salt)
         Assert.assertEquals(secret.contentToString(), decrypted.contentToString())
     }
 

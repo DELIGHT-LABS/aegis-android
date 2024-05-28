@@ -87,11 +87,11 @@ class Aegis {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray): Packet {
-    val encrypted = cipherEncrypt(cVersion, secret, password)
+fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray, salt: ByteArray): Packet {
+    val encrypted = cipherEncrypt(cVersion, secret, password, salt)
 
     // Verify
-    val decrypted = cipherDecrypt(encrypted, password)
+    val decrypted = cipherDecrypt(encrypted, password, salt)
 
     if (!decrypted.contentEquals(secret)) {
         throw Exception("Encryption verification failed")
@@ -101,6 +101,6 @@ fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray): Packe
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun decrypt(secret: Packet, password: ByteArray): Secret {
-    return cipherDecrypt(secret, password)
+fun decrypt(secret: Packet, password: ByteArray, salt: ByteArray): Secret {
+    return cipherDecrypt(secret, password, salt)
 }

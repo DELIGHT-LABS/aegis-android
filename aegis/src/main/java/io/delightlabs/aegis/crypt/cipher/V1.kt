@@ -6,6 +6,7 @@ import io.delightlabs.aegis.common.Secret
 import io.delightlabs.aegis.crypt.cipher.aes.Aes
 import io.delightlabs.aegis.crypt.cipher.hash.blake2b
 import java.lang.Exception
+import java.security.SecureRandom
 
 class VersionV1 {
 
@@ -15,26 +16,30 @@ class VersionV1 {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun encrypt(plainText: Secret, password: ByteArray): Secret {
+    fun encrypt(plainText: Secret, password: ByteArray, salt: ByteArray): Secret {
         // Prepare key
-        val hashedKey = blake2b(aesKeyLen, password)
+        val hashedKey = blake2b(aesKeyLen, password + salt)
 
-        // Prepare IvKey
-        val ivKey = blake2b(aesIvKeyLen, password)
+        // Prepare initial vector
+        val iv = ByteArray(aesIvKeyLen)
+        val random = SecureRandom()
+        random.nextBytes(iv)
 
         // Encrypt
-        return Aes.encrypt(plainText, hashedKey, ivKey)
+        val encrypted = iv + Aes.encrypt(plainText, hashedKey, iv)
+        return encrypted
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun decrypt(cipherText: Secret, password: ByteArray): Secret {
+    fun decrypt(cipherText: Secret, password: ByteArray, salt: ByteArray): Secret {
         // Prepare key
-        val hashedKey = blake2b(aesKeyLen, password)
+        val hashedKey = blake2b(aesKeyLen, password + salt)
 
-        // Prepare IvKey
-        val ivKey = blake2b(aesIvKeyLen, password)
+        // Detach initial vector
+        val iv = cipherText.sliceArray(0 until aesIvKeyLen)
+        val encrypted = cipherText.sliceArray(aesIvKeyLen until cipherText.size)
 
         // Decrypt
-        return Aes.decrypt(cipherText, hashedKey, ivKey)
+        return Aes.decrypt(encrypted, hashedKey, iv)
     }
 }
