@@ -1,59 +1,47 @@
 package io.delightlabs.aegis.crypt.cipher.aes
 import android.os.Build
 import androidx.annotation.RequiresApi
+import io.delightlabs.aegis.common.Secret
 import java.util.Base64
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object Aes {
-    const val HMAC_LEN = 16
+    const val IV_LEN = 12
+    const val TAG_LEN = 16
 
+    @OptIn(ExperimentalStdlibApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
-    fun encrypt(plainText: ByteArray, key: ByteArray, ivKey: ByteArray): ByteArray {
-        val hmacText = ivKey + plainText
+    fun encryptGCM(plainText: Secret, key: ByteArray): Secret {
+        // Prepare key
+        val secretKey: SecretKey = SecretKeySpec(key, "AES")
 
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(ivKey))
-        val paddedPlainText = padPKCS7(hmacText, cipher.blockSize)
+        // Encrypt
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
 
-        val encrypted = cipher.doFinal(paddedPlainText)
-
-        val sliceEncrypted = encrypted.dropLast(HMAC_LEN).toByteArray()
-
-
-        return Base64.getEncoder().encode(sliceEncrypted)
+        val encrypted = cipher.iv + cipher.doFinal(plainText)
+        // Base64 encoding
+        return Base64.getEncoder().encode(encrypted)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun decrypt(cipherText: ByteArray, key: ByteArray, ivKey: ByteArray): ByteArray {
+    fun decryptGCM(cipherText: Secret, key: ByteArray): Secret {
         val decoded = Base64.getDecoder().decode(cipherText)
 
-        val decipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        decipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(ivKey))
+        val ivKey = decoded.slice(IntRange(0, IV_LEN-1)).toByteArray()
+        val encryptedText = decoded.slice(IntRange(IV_LEN, decoded.size-TAG_LEN-1)).toByteArray()
+        val tag = decoded.slice(IntRange(decoded.size-TAG_LEN, decoded.size-1)).toByteArray()
 
-        val data = decipher.update(decoded)
-        val decryptedText = data + decipher.doFinal()
+        val decipher = Cipher.getInstance("AES/GCM/NoPadding")
+        val spec = GCMParameterSpec(TAG_LEN * 8, ivKey)
+        decipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), spec)
 
-        if (!(ivKey.contentEquals(decryptedText.take(HMAC_LEN).toByteArray()))) {
-            throw IllegalArgumentException("Wrong key")
-        }
+        val decryptedText = decipher.doFinal(encryptedText + tag)
 
-        return decryptedText.slice(IntRange(HMAC_LEN, decryptedText.size-1)).toByteArray()
+        return decryptedText
     }
-
-    private fun padPKCS7(plainText: ByteArray, blockSize: Int): ByteArray {
-        val padding = blockSize - (plainText.size % blockSize)
-        val padText = ByteArray(padding) { padding.toByte() }
-        return plainText + padText
-    }
-
-   private fun trimPKCS5(text: ByteArray): ByteArray {
-        val padding = text.last()
-        if (padding.toInt() > text.size) {
-            return text
-        }
-    return text.copyOfRange(0, text.size - padding.toInt())
-}
 
 }
