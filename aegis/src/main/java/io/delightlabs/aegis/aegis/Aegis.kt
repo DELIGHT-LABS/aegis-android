@@ -17,7 +17,7 @@ import io.delightlabs.aegis.protocol.unpack
 
 typealias payload = ByteArray
 class Aegis {
-    var payloads: List<payload> = emptyList()
+    var payloads: List<String> = emptyList()
 
     companion object {
         @RequiresApi(Build.VERSION_CODES.O)
@@ -54,7 +54,7 @@ class Aegis {
             return aegis
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        fun combineShares(payloads: List<payload>): Secret {
+        fun combineShares(payloads: List<String>): Secret {
             // Pre-verification
             if (payloads.isEmpty() || payloads.size < NUM_MINIMUM_SHARE) {
                 throw Exception("not enough shares")
@@ -87,7 +87,7 @@ class Aegis {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray, salt: ByteArray): Packet {
+fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray, salt: ByteArray): String {
     val encrypted = cipherEncrypt(cVersion, secret, password, salt)
 
     // Verify
@@ -101,6 +101,6 @@ fun encrypt(cVersion: CipherVersion, secret: Secret, password: ByteArray, salt: 
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun decrypt(secret: Packet, password: ByteArray, salt: ByteArray): Secret {
+fun decrypt(secret: String, password: ByteArray, salt: ByteArray): Secret {
     return cipherDecrypt(secret, password, salt)
 }

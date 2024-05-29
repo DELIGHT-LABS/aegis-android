@@ -31,20 +31,15 @@ data class SecretResponse(val secret: String)
 class Citadel(private val token: String, private val urls: List<Url>)  {
     private val forts: List<Fort> = urls.map { Fort(token, it) }
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun store(payloads: List<payload>, key: ByteArray) {
+    suspend fun store(payloads: List<String>, key: ByteArray) {
         if (payloads.size != forts.size) {
             throw Exception("Payloads and Fort do not match")
         }
 
-//        val strKey = Base64.getEncoder().encodeToString(key)
-
         val responses = mutableListOf<Deferred<Unit>>()
         for (i in payloads.indices) {
-            // encode to base64
-            val data = Base64.getEncoder().encodeToString(payloads[i])
-
             val res = coroutineScope {
-                async { putSecret(forts[i], data, true) }
+                async { putSecret(forts[i], payloads[i], true) }
             }
             responses.add(res)
         }
@@ -54,7 +49,7 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun retrieve(key: ByteArray): List<payload> {
+    suspend fun retrieve(key: ByteArray): List<String> {
         val strKey = Base64.getEncoder().encodeToString(key)
 
         val responses = mutableListOf<Deferred<String>>()
@@ -68,12 +63,12 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
                 }
             }
 
-        val res = mutableListOf<payload>()
+        val res = mutableListOf<String>()
         responses.forEach { response ->
             try {
                 val r = response.await()
                 val secretResponse = Gson().fromJson(r, SecretResponse::class.java)
-                res.add(Base64.getDecoder().decode(secretResponse.secret))
+                res.add(secretResponse.secret)
             } catch (err: Exception) {
                 println("Error: $err")
             }

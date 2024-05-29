@@ -32,19 +32,25 @@ data class Payload(
     var packet: Packet
 )
 
-fun pack(version: Version, v: Any): ByteArray {
+@RequiresApi(Build.VERSION_CODES.O)
+fun pack(version: Version, v: Any): String {
     val p = Payload(version, ByteArray(0))
 
     val pc = getProtocol(p.protocolVersion) ?: throw Exception("Unsupported protocol")
 
     p.packet = pc.pack(v)
-    return gson.toJson(p).toByteArray()
+
+    val data = gson.toJson(p).toByteArray()
+    return Base64.getEncoder().encodeToString(data)
 }
 
-fun unpack(data: ByteArray): Any {
+@RequiresApi(Build.VERSION_CODES.O)
+fun unpack(data: String): Any {
+    val decoded = Base64.getDecoder().decode(data)
+
     val p: Payload
     try {
-        p = gson.fromJson(String(data), Payload::class.java)
+        p = gson.fromJson(String(decoded), Payload::class.java)
     } catch (e: JsonSyntaxException) {
         throw Exception("Invalid data format")
     }

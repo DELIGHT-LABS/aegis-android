@@ -8,6 +8,7 @@ import io.delightlabs.aegis.protocol.gson
 import io.delightlabs.aegis.protocol.pack
 import io.ktor.http.Url
 import java.lang.Exception
+import java.util.Base64
 
 enum class Version {
     UNSPECIFIED,
@@ -20,7 +21,7 @@ data class CipherPacket (
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun encrypt(version: Version, plainText: Secret, password: ByteArray, salt: ByteArray): Packet {
+fun encrypt(version: Version, plainText: Secret, password: ByteArray, salt: ByteArray): String {
     val packet: CipherPacket
 
     when (version) {
@@ -31,14 +32,15 @@ fun encrypt(version: Version, plainText: Secret, password: ByteArray, salt: Byte
         else -> throw Exception("unsupported cipher version")
     }
 
-
-
-    return gson.toJson(packet).toByteArray()
+    val packed = gson.toJson(packet).toByteArray()
+    return Base64.getEncoder().encodeToString(packed)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun decrypt(packet: Packet, password: ByteArray, salt: ByteArray): Secret {
-    val cipher = gson.fromJson(String(packet), CipherPacket::class.java)
+fun decrypt(packet: String, password: ByteArray, salt: ByteArray): Secret {
+    val decoded = Base64.getDecoder().decode(packet)
+
+    val cipher = gson.fromJson(String(decoded), CipherPacket::class.java)
 
     val decrypted: Secret
 
