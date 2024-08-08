@@ -27,14 +27,15 @@ interface Protocol {
 }
 
 data class Payload(
+    val timestamp: Long,
     @SerializedName("protocol_version")
     val protocolVersion: Version,
     var packet: Packet
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun pack(version: Version, v: Any): String {
-    val p = Payload(version, ByteArray(0))
+fun pack(version: Version, v: Any, timestamp: Long): String {
+    val p = Payload(timestamp, version, ByteArray(0))
 
     val pc = getProtocol(p.protocolVersion) ?: throw Exception("Unsupported protocol")
 
@@ -45,7 +46,7 @@ fun pack(version: Version, v: Any): String {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun unpack(data: String): Any {
+fun unpack(data: String): Pair<Any, Long> {
     val decoded = Base64.getDecoder().decode(data)
 
     val p: Payload
@@ -57,7 +58,7 @@ fun unpack(data: String): Any {
 
     val pc = getProtocol(p.protocolVersion) ?: throw Exception("Unsupported protocol")
 
-    return pc.unpack(p.packet)
+    return Pair(pc.unpack(p.packet), p.timestamp)
 }
 
 fun getProtocol(version: Version): Protocol? {

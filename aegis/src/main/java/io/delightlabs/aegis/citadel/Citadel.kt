@@ -50,8 +50,6 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun retrieve(key: ByteArray): List<String> {
-        val strKey = Base64.getEncoder().encodeToString(key)
-
         val responses = mutableListOf<Deferred<String>>()
 
             coroutineScope {

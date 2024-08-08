@@ -27,7 +27,6 @@ class VersionV1 : Protocol {
 
         this.cryptAlgorithm = v.getAlgorithm().name
         this.sharePacket = v.serialize()
-        this.share = v
 
         return gson.toJson(this).toByteArray()
     }
@@ -35,8 +34,13 @@ class VersionV1 : Protocol {
     override fun unpack(packet: Packet): Any {
         val v1 = gson.fromJson(String(packet), VersionV1::class.java)
 
-        this.share = Algorithm.valueOf(v1.cryptAlgorithm!!).newShare(v1.sharePacket!!)
-        return this.share!!
+        this.share = v1.cryptAlgorithm?.let { algo ->
+            v1.sharePacket?.let { packet ->
+                Algorithm.valueOf(algo).newShare(packet)
+            }
+        } ?: throw Exception("Invalid data format")
+
+        return this.share ?: throw Exception("Invalid data format")
     }
 }
 
