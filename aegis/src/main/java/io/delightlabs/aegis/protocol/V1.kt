@@ -27,7 +27,6 @@ class VersionV1 : Protocol {
 
         this.cryptAlgorithm = v.getAlgorithm().name
         this.sharePacket = v.serialize()
-        this.share = v
 
         return gson.toJson(this).toByteArray()
     }

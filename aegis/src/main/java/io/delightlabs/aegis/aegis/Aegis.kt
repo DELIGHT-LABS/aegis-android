@@ -45,9 +45,10 @@ class Aegis {
                 throw Exception("shares verification failed")
             }
 
+            val timestamp = System.currentTimeMillis()
             // Pack
             shares.forEach { share ->
-                val packed = pack(pVersion, share)
+                val packed = pack(pVersion, share, timestamp)
                 aegis.payloads = aegis.payloads.plus(packed)
             }
 
@@ -61,16 +62,31 @@ class Aegis {
             }
 
             // Unpack
-            var algorithm = Algorithm.UNSPECIFIED
+            val timestampToShares = mutableMapOf<Long, List<Share>>()
 
-            var shares = emptyList<Share>()
             payloads.forEach { payload ->
-                val share = unpack(payload)
+                val res = unpack(payload)
+                val share = res.first
+                val timestamp = res.second
+
                 if (share !is Share) {
                     throw Exception("Protocol argument mismatch")
                 }
-                shares = shares.plus(share)
 
+                timestampToShares[timestamp] = timestampToShares.getOrPut(timestamp) { listOf() }.plus(share)
+            }
+
+            // pick majority shares
+            var majorityShares: List<Share> = emptyList()
+            timestampToShares.forEach { (timestamp, shares) ->
+                if (shares.size > majorityShares.size) {
+                    majorityShares = shares
+                }
+            }
+
+            // validation
+            var algorithm = Algorithm.UNSPECIFIED
+            majorityShares.forEach { share ->
                 if (algorithm == Algorithm.UNSPECIFIED) {
                     algorithm = share.getAlgorithm()
                 } else if (algorithm != share.getAlgorithm()) {
@@ -80,7 +96,7 @@ class Aegis {
 
             // Combine
             val algo = algorithm.new()
-            return algo.combineShares(shares)
+            return algo.combineShares(majorityShares)
         }
 
     }
