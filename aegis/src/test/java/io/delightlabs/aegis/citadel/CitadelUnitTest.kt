@@ -53,14 +53,14 @@ class CitadelUnitTest {
             secret,
         )
 
-        val token = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ5b3VuZ0BkZWxpZ2h0bGFicy5pbyIsImV4cCI6MTc0Njc4NDczMCwianRpIjoiOGJmYTVkMjgtZjkxZi00YmQ3LTgxYTMtZGM4NjllYWVkNmYyIiwic3NvX3Byb3ZpZGVyIjoiR29vZ2xlIn0.ukJ0gYQsZRE8gktRtzxA6cfPH97zWzwLTmU8DODX9sOSwnLPJ0dFFssTbQm0WE-Cfl95COAAl6WwuQ6NSVEIDg"
+        val token = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ4cGxhLWdhbWVzIiwic3ViIjoidGVzdEBkZWxpZ2h0bGFicy5pbyIsImV4cCI6MTc4NzMxMzM0OCwianRpIjoiYWFhYWFhYWEtYmJiYi1jY2NjLWRkZGQtZWVlZWVlZWVlZWVlIiwic3NvX3Byb3ZpZGVyIjoiR29vZ2xlIn0.CXMj447bNXTQwKgkNrwYzucPYH5uxYGQmuDbfb1F2eIZMvhenXa3zYn0PlI4N16BbuG9Riv9Q_LoN4-bUuPcBg"
         val urls = listOf(
-            Url("http://34.124.155.209:8080"),
-            Url("http://34.124.155.209:8081"),
-            Url("http://34.124.155.209:8082")
+            Url("https://citadel-fort1.develop.delightlabs.dev"),
+            Url("https://citadel-fort2.develop.delightlabs.dev"),
+            Url("https://citadel-fort3.develop.delightlabs.dev"),
         )
         val citadel = Citadel(token, urls)
-        val uuid = "8bfa5d28-f91f-4bd7-81a3-dc869eaed6f2".toByteArray()
+        val uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee".toByteArray()
         runBlocking {
             citadel.store(aegis.payloads, uuid)
 
