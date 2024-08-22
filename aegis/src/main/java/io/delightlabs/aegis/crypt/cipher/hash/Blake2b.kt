@@ -10,3 +10,9 @@ fun blake2b(size: Int, key: ByteArray): ByteArray {
     digest.update(key)
     return digest.digest()
 }
+
+fun checkSum(message: String): String{
+    val key = message.toByteArray()
+    val hash = blake2b(64, key)
+    return hash.joinToString("") { "%02x".format(it) }
+}

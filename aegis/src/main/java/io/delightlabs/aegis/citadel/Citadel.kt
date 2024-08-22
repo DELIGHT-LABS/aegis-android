@@ -2,6 +2,7 @@ package io.delightlabs.aegis.citadel
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
+import io.delightlabs.aegis.crypt.cipher.hash.checkSum
 import io.delightlabs.aegis.payload
 import io.ktor.client.*
 import io.ktor.client.engine.cio.CIO
@@ -23,10 +24,10 @@ data class Fort(
 )
 
 @Serializable
-data class SecretPayload(val overwrite: Boolean, val secret: String)
+data class SecretPayload(val overwrite: Boolean, val secret: String, val checksum: String)
 
 @Serializable
-data class SecretResponse(val secret: String)
+data class SecretResponse(val secret: String, val checksum: String?)
 
 class Citadel(private val token: String, private val urls: List<Url>)  {
     private val forts: List<Fort> = urls.map { Fort(token, it) }
@@ -39,7 +40,8 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
         val responses = mutableListOf<Deferred<Unit>>()
         for (i in payloads.indices) {
             val res = coroutineScope {
-                async { putSecret(forts[i], payloads[i], true) }
+                val checksum = checkSum(payloads[i])
+                async { putSecret(forts[i], payloads[i], checksum, true) }
             }
             responses.add(res)
         }
@@ -66,6 +68,15 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
             try {
                 val r = response.await()
                 val secretResponse = Gson().fromJson(r, SecretResponse::class.java)
+
+                // checksum
+                val checksum = checkSum(secretResponse.secret)
+                if (checksum != secretResponse.checksum) {
+                    if(!(secretResponse.checksum == null || secretResponse.checksum == "")){
+                        throw Exception("Checksum mismatch")
+                    }
+                }
+
                 res.add(secretResponse.secret)
             } catch (err: Exception) {
                 println("Error: $err")
@@ -76,8 +87,8 @@ class Citadel(private val token: String, private val urls: List<Url>)  {
     }
 
     @OptIn(InternalAPI::class)
-    private suspend fun putSecret(fort: Fort, secret: String, overwrite: Boolean = true) {
-        val payload = SecretPayload(overwrite, secret)
+    private suspend fun putSecret(fort: Fort, secret: String, checksum: String, overwrite: Boolean = true) {
+        val payload = SecretPayload(overwrite, secret, checksum)
         val client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 gson()
